@@ -11,6 +11,7 @@ class remove_external_content extends Plugin {
 
 	function init($host) {
 		$this->host = $host;
+//		$this->check_new_session();
 
 		#$host->add_hook($host::HOOK_FEED_PARSED, $this);
 		#$host->add_hook($host::HOOK_ARTICLE_FILTER, $this);
@@ -18,19 +19,43 @@ class remove_external_content extends Plugin {
 		$host->add_hook($host::HOOK_TOOLBAR_BUTTON, $this);
 	}
 
+	function get_icon_class() {
+		return $this->host->get($this, 'active') ? 'icon-ban-circle' : 'icon-cloud-download';
+	}
+
+	function get_icon_text() {
+		return $this->host->get($this, 'active') ? 'External content blocked' : 'External content unblocked';
+	}
+
+	function check_new_session() {
+		user_error("current session: " . $_SESSION["csrf_token"], E_USER_WARNING);
+		user_error("stored session: " . $this->host->get($this, 'sessionid'), E_USER_WARNING);
+                user_error("active: " . $this->host->get($this, 'active'), E_USER_WARNING);
+
+		$new_session = !($this->host->get($this, 'sessionid') == $_SESSION["csrf_token"]);
+		user_error("new session: " . $new_session, E_USER_WARNING);
+		if ($new_session) {
+			user_error("started new session!: ", E_USER_WARNING);
+			$this->host->set($this, 'active', true);
+			$this->host->set($this, 'sessionid', $_SESSION["csrf_token"]);
+		}
+	} 
+
         function test_func() {
 		$id = trim(db_escape_string($_REQUEST['id']));
 		$json_conf = $this->host->get($this, 'active') ? 'true' : 'false';
                 user_error("test4 |" . $json_conf . "|", E_USER_WARNING);
+//		user_error("session: " . $_SESSION["csrf_token"], E_USER_WARNING);
                 $this->host->set($this, 'active', ! $this->host->get($this, 'active'));
-		$icon_class = $this->host->get($this, 'active') ? 'icon-ban-circle' : 'icon-cloud-download';
-		$icon_text  = $this->host->get($this, 'active') ? 'External content blocked' : 'External content unblocked';
+		$icon_class = $this->get_icon_class();
+		$icon_text  = $this->get_icon_text();
 		print json_encode(array("class_name" => $icon_class, "title" => $icon_text));
 		#echo $icon_class;
         }
 
 
 	function HOOK_TOOLBAR_BUTTON() {
+		$this->check_new_session();
 		require_once dirname(__FILE__) . "/toolbar.php";
 	}
 

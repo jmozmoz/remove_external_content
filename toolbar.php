@@ -8,13 +8,13 @@ print_user_stylesheet($link);
 
 <button id="remove_external_content_button" class="button_nav" title="<?php 
 
-$icon_text  = $this->host->get($this, 'active') ? 'External content blocked' : 'External content unblocked';
+$icon_text  = $this->get_icon_text();
 echo "$icon_text";
 
 ?>" onclick="toggle_cdm_expanded()">
 <i id="remove_external_content_icon" class="<?php 
 
-$icon_class = $this->host->get($this, 'active') ? 'icon-ban-circle' : 'icon-cloud-download';
+$icon_class = $this->get_icon_class();
 echo $icon_class;
 
 ?>"></i></button>
